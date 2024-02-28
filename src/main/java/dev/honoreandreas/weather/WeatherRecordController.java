@@ -3,12 +3,10 @@ package dev.honoreandreas.weather;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -23,5 +21,16 @@ public class WeatherRecordController {
     @GetMapping("/{date}")
     public ResponseEntity<Optional<WeatherRecord>> getSingleWeatherRecord(@PathVariable String date) {
         return new ResponseEntity<Optional<WeatherRecord>>(weatherRecordService.singleWeatherRecord(date), HttpStatus.OK);
+    }
+    @PostMapping
+    public ResponseEntity<WeatherRecord> postWeatherRecord(@RequestBody Map<String, String> payload) {
+        return new ResponseEntity<WeatherRecord>(weatherRecordService.createWeatherRecord(
+                payload.get("title"),
+                payload.get("date"),
+                payload.get("description"),
+                Integer.parseInt(payload.get("temperature")),
+                Integer.parseInt(payload.get("humidity")),
+                payload.get("weatherPicture")
+        ), HttpStatus.CREATED);
     }
 }

@@ -1,5 +1,6 @@
 package dev.honoreandreas.weather;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -24,5 +25,24 @@ public class WeatherRecordService {
                 endDate,
                 Sort.by(Sort.Direction.ASC, "date")
         );
+    }
+    public WeatherRecord createWeatherRecord(
+            String title,
+            String date,
+            String description,
+            int temperature,
+            int humidity,
+            String weatherPicture
+            ) {
+        WeatherRecord weatherRecord = new WeatherRecord(
+                new ObjectId(),
+                title,
+                date,
+                description,
+                temperature,
+                humidity,
+                weatherPicture
+                );
+        return weatherRecordRepository.save(weatherRecord);
     }
 }
