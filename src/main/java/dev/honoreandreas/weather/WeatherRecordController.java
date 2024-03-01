@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/weather")
+@CrossOrigin(origins="*")
 public class WeatherRecordController {
     @Autowired
     private WeatherRecordService weatherRecordService;
@@ -22,15 +23,16 @@ public class WeatherRecordController {
     public ResponseEntity<Optional<WeatherRecord>> getSingleWeatherRecord(@PathVariable String date) {
         return new ResponseEntity<Optional<WeatherRecord>>(weatherRecordService.singleWeatherRecord(date), HttpStatus.OK);
     }
-    @PostMapping
-    public ResponseEntity<WeatherRecord> postWeatherRecord(@RequestBody Map<String, String> payload) {
-        return new ResponseEntity<WeatherRecord>(weatherRecordService.createWeatherRecord(
-                payload.get("title"),
-                payload.get("date"),
-                payload.get("description"),
-                Integer.parseInt(payload.get("temperature")),
-                Integer.parseInt(payload.get("humidity")),
-                payload.get("weatherPicture")
-        ), HttpStatus.CREATED);
-    }
+
+//    @PostMapping
+//    public ResponseEntity<WeatherRecord> postWeatherRecord(@RequestBody Map<String, String> payload) {
+//        return new ResponseEntity<WeatherRecord>(weatherRecordService.createWeatherRecord(
+//                payload.get("location"),
+//                payload.get("date"),
+//                payload.get("description"),
+//                Double.parseDouble(payload.get("temperature")),
+//                Double.parseDouble(payload.get("humidity")),
+//                payload.get("weatherPicture")
+//        ), HttpStatus.CREATED);
+//    }
 }

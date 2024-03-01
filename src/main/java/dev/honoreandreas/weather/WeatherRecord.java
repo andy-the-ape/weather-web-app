@@ -3,6 +3,7 @@ package dev.honoreandreas.weather;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -11,13 +12,18 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class WeatherRecord {
     @Id
     private ObjectId id;
-    private String title;
+    private String location;
     private String date;
+    private String weatherTitle;
     private String description;
-    private int temperature;
-    private int humidity;
+    private double temperature;
+    private double humidity;
+    private double windSpeed;
+    private double windDirection;
+    private String icon;
     private String weatherPicture;
 }
