@@ -4,9 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -17,22 +15,16 @@ public class WeatherRecordController {
     private WeatherRecordService weatherRecordService;
     @GetMapping
     public ResponseEntity<List<WeatherRecord>> getAllWeatherRecords() {
-        return new ResponseEntity<List<WeatherRecord>>(weatherRecordService.allWeatherRecords(), HttpStatus.OK);
-    }
-    @GetMapping("/{date}")
-    public ResponseEntity<Optional<WeatherRecord>> getSingleWeatherRecord(@PathVariable String date) {
-        return new ResponseEntity<Optional<WeatherRecord>>(weatherRecordService.singleWeatherRecord(date), HttpStatus.OK);
+        return new ResponseEntity<>(weatherRecordService.allWeatherRecords(), HttpStatus.OK);
     }
 
-//    @PostMapping
-//    public ResponseEntity<WeatherRecord> postWeatherRecord(@RequestBody Map<String, String> payload) {
-//        return new ResponseEntity<WeatherRecord>(weatherRecordService.createWeatherRecord(
-//                payload.get("location"),
-//                payload.get("date"),
-//                payload.get("description"),
-//                Double.parseDouble(payload.get("temperature")),
-//                Double.parseDouble(payload.get("humidity")),
-//                payload.get("weatherPicture")
-//        ), HttpStatus.CREATED);
-//    }
+    @GetMapping("/today")
+    public ResponseEntity<Optional<WeatherRecord>> getCurrentWeatherRecord() {
+        return new ResponseEntity<>(Optional.ofNullable(weatherRecordService.getCurrentWeatherRecord()), HttpStatus.OK);
+    }
+
+    @GetMapping("/{date}")
+    public ResponseEntity<Optional<WeatherRecord>> getSingleWeatherRecordByDate(@PathVariable String date) {
+        return new ResponseEntity<>(weatherRecordService.singleWeatherRecord(date), HttpStatus.OK);
+    }
 }

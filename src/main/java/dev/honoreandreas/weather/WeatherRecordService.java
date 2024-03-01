@@ -3,21 +3,23 @@ package dev.honoreandreas.weather;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Getter
 public class WeatherRecordService {
     @Autowired
     private WeatherRecordRepository weatherRecordRepository;
@@ -31,14 +33,14 @@ public class WeatherRecordService {
             "&lon=" +
             longitude +
             "&appid=2438ec868e96bc0d041dc6fde565f0b6";
-    private WeatherRecord weatherRecordToSave;
     private WeatherRecord currentWeatherRecord;
+    private boolean persisted = false;
 
     public List<WeatherRecord> allWeatherRecords() {
         return weatherRecordRepository.findAll();
     }
     public Optional<WeatherRecord> singleWeatherRecord(String date) {
-        return weatherRecordRepository.findWeatherRecordByDate(date);
+        return weatherRecordRepository.findByDate(date);
     }
     public Optional<List<WeatherRecord>> allWeatherRecordsBetweenDates(String startDate, String endDate) {
         return weatherRecordRepository.findWeatherRecordsByDateBetweenInclusiveSorted(
@@ -49,7 +51,8 @@ public class WeatherRecordService {
     }
 
     //This method runs every 5 minutes to gather data from the external weather API
-    @Scheduled(cron = "0 */5 * * * *")
+//    @Scheduled(cron = "0 */5 * * * *")
+    @Scheduled(fixedDelay = 10000)
     public void fetchWeatherRecord() {
         ResponseEntity<String> responseEntity = restTemplate.getForEntity(EXTERNAL_API_URL, String.class);
         String weatherDetailsJson = responseEntity.getBody();
@@ -57,9 +60,8 @@ public class WeatherRecordService {
             JsonNode weatherNode = new ObjectMapper().readTree(weatherDetailsJson);
 
             //Handling date
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM-dd-yyyy");
-            String currentDate = String.valueOf(java.time.LocalDate.now());
-            String formattedDate = simpleDateFormat.format(currentDate);
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM-dd-yyyy");
+            String formattedDate = LocalDate.now().format(dateFormatter);
 
             currentWeatherRecord = createWeatherRecord(
                     "Odense",
@@ -75,14 +77,10 @@ public class WeatherRecordService {
             // Check if current time is after 2pm and before 6pm
             LocalTime timeNow = LocalTime.now();
             LocalTime lowerBoundTime = LocalTime.of(14, 0);
-            LocalTime upperBoundTime = LocalTime.of(18, 0);
+            LocalTime upperBoundTime = LocalTime.of(21, 0);
             if (timeNow.isAfter(lowerBoundTime) && timeNow.isBefore(upperBoundTime)) {
-                //checking if today's entry of WeatherRecord already exists in the database
-                if (weatherRecordRepository.findWeatherRecordByDate(currentDate).isEmpty()) {
-                    persistWeatherRecord();
-                }
+                addWeatherRecordToDB(currentWeatherRecord);
             }
-            System.out.println(weatherRecordToSave);
         } catch (JsonProcessingException e) {
             e.printStackTrace(System.out);
         }
@@ -91,9 +89,17 @@ public class WeatherRecordService {
     // This method saves data into the database once a day at 2 PM
     @Scheduled(cron = "0 14 * * * *") // Runs at 2 PM every day
     public void persistWeatherRecord() {
+        addWeatherRecordToDB(currentWeatherRecord);
+
+    }
+    public void addWeatherRecordToDB(WeatherRecord weatherRecord) {
         // Check if there is data to save
-        if (currentWeatherRecord != null) {
-            weatherRecordRepository.save(currentWeatherRecord);
+        if (weatherRecord != null) {
+            //checking if today's entry of WeatherRecord is already persisted
+            Optional<WeatherRecord> existingRecord = weatherRecordRepository.findByDate(weatherRecord.getDate());
+            if (existingRecord.isEmpty()) {
+                weatherRecordRepository.save(weatherRecord);
+            }
         }
     }
     public WeatherRecord createWeatherRecord(
@@ -106,7 +112,7 @@ public class WeatherRecordService {
             double windSpeed,
             double windDirection
             ) {
-        WeatherRecord weatherRecord = new WeatherRecord(
+        return new WeatherRecord(
                 new ObjectId(),
                 location,
                 date,
@@ -115,10 +121,8 @@ public class WeatherRecordService {
                 temperature,
                 humidity,
                 windSpeed,
-                windDirection,
-                null,
-                null
+                windDirection
                 );
-        return weatherRecordRepository.save(weatherRecord);
     }
+
 }
