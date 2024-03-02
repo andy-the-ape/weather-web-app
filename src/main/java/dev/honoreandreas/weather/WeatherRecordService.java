@@ -32,9 +32,8 @@ public class WeatherRecordService {
             latitude +
             "&lon=" +
             longitude +
-            "&appid=2438ec868e96bc0d041dc6fde565f0b6";
+            "&appid=2438ec868e96bc0d041dc6fde565f0b6&units=metric&lang=da";
     private WeatherRecord currentWeatherRecord;
-    private boolean persisted = false;
 
     public List<WeatherRecord> allWeatherRecords() {
         return weatherRecordRepository.findAll();
@@ -59,15 +58,17 @@ public class WeatherRecordService {
         try {
             JsonNode weatherNode = new ObjectMapper().readTree(weatherDetailsJson);
 
-            //Handling date
+            //Handling date format
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM-dd-yyyy");
             String formattedDate = LocalDate.now().format(dateFormatter);
 
             currentWeatherRecord = createWeatherRecord(
                     "Odense",
                     formattedDate,
+                    weatherNode.get("weather").get(0).get("id").intValue(),
                     weatherNode.get("weather").get(0).get("main").textValue(),
                     weatherNode.get("weather").get(0).get("description").textValue(),
+                    weatherNode.get("weather").get(0).get("icon").textValue(),
                     weatherNode.get("main").get("temp").doubleValue(),
                     weatherNode.get("main").get("humidity").doubleValue(),
                     weatherNode.get("wind").get("speed").doubleValue(),
@@ -76,7 +77,7 @@ public class WeatherRecordService {
 
             // Check if current time is after 2pm and before 6pm
             LocalTime timeNow = LocalTime.now();
-            LocalTime lowerBoundTime = LocalTime.of(14, 0);
+            LocalTime lowerBoundTime = LocalTime.of(9, 0);
             LocalTime upperBoundTime = LocalTime.of(21, 0);
             if (timeNow.isAfter(lowerBoundTime) && timeNow.isBefore(upperBoundTime)) {
                 addWeatherRecordToDB(currentWeatherRecord);
@@ -105,8 +106,10 @@ public class WeatherRecordService {
     public WeatherRecord createWeatherRecord(
             String location,
             String date,
+            int weatherId,
             String weatherTitle,
-            String description,
+            String weatherDescription,
+            String weatherIconId,
             double temperature,
             double humidity,
             double windSpeed,
@@ -116,8 +119,10 @@ public class WeatherRecordService {
                 new ObjectId(),
                 location,
                 date,
+                weatherId,
                 weatherTitle,
-                description,
+                weatherDescription,
+                weatherIconId,
                 temperature,
                 humidity,
                 windSpeed,
