@@ -59,7 +59,7 @@ public class WeatherRecordService {
             JsonNode weatherNode = new ObjectMapper().readTree(weatherDetailsJson);
 
             //Handling date format
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM-dd-yyyy");
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
             String formattedDate = LocalDate.now().format(dateFormatter);
 
             currentWeatherRecord = createWeatherRecord(
