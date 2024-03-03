@@ -13,12 +13,12 @@ import java.util.Optional;
 public class WeatherRecordController {
     @Autowired
     private WeatherRecordService weatherRecordService;
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<WeatherRecord>> getAllWeatherRecords() {
         return new ResponseEntity<>(weatherRecordService.allWeatherRecords(), HttpStatus.OK);
     }
 
-    @GetMapping("/today")
+    @GetMapping
     public ResponseEntity<Optional<WeatherRecord>> getCurrentWeatherRecord() {
         return new ResponseEntity<>(Optional.ofNullable(weatherRecordService.getCurrentWeatherRecord()), HttpStatus.OK);
     }
