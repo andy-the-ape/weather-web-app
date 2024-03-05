@@ -14,7 +14,7 @@ public class WeatherRecordController {
     @Autowired
     private WeatherRecordService weatherRecordService;
     @GetMapping("/all")
-    public ResponseEntity<List<WeatherRecord>> getAllWeatherRecords() {
+    public ResponseEntity<Optional<List<WeatherRecord>>> getAllWeatherRecords() {
         return new ResponseEntity<>(weatherRecordService.allWeatherRecords(), HttpStatus.OK);
     }
 
@@ -26,5 +26,13 @@ public class WeatherRecordController {
     @GetMapping("/{date}")
     public ResponseEntity<Optional<WeatherRecord>> getSingleWeatherRecordByDate(@PathVariable String date) {
         return new ResponseEntity<>(weatherRecordService.singleWeatherRecord(date), HttpStatus.OK);
+    }
+
+    @GetMapping("/{startDate}/{endDate}")
+    public ResponseEntity<Optional<List<WeatherRecord>>> getWeatherRecordsBetweenDates(
+            @PathVariable String startDate,
+            @PathVariable String endDate
+    ) {
+        return new ResponseEntity<>(weatherRecordService.allWeatherRecordsBetweenDates(startDate, endDate), HttpStatus.OK);
     }
 }

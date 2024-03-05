@@ -35,8 +35,8 @@ public class WeatherRecordService {
             "&appid=2438ec868e96bc0d041dc6fde565f0b6&units=metric&lang=da";
     private WeatherRecord currentWeatherRecord;
 
-    public List<WeatherRecord> allWeatherRecords() {
-        return weatherRecordRepository.findAll();
+    public Optional<List<WeatherRecord>> allWeatherRecords() {
+        return Optional.of(weatherRecordRepository.findAll());
     }
     public Optional<WeatherRecord> singleWeatherRecord(String date) {
         return weatherRecordRepository.findByDate(date);
